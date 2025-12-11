@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>旅遊穿搭小幫手</title>
+    <style>
+        :root {
+            --primary-color: #f4a261;
+            --bg-color: #fdfcf8;
+            --card-bg: #ffffff;
+            --text-color: #333;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: var(--card-bg);
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            width: 100%;
+            max-width: 400px;
+            padding: 30px;
+            text-align: center;
+        }
+
+        h1 {
+            color: var(--text-color);
+            margin-bottom: 5px;
+            font-size: 1.5rem;
+        }
+
+        .subtitle {
+            color: #888;
+            font-size: 0.9rem;
+            margin-bottom: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            color: #555;
+        }
+
+        /* 修改：美化下拉選單 */
+        select, input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            font-size: 1rem;
+            box-sizing: border-box;
+            background-color: #f9f9f9;
+            appearance: none; /* 讓不同瀏覽器的箭頭樣式統一 */
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='gray' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 1em;
+        }
+        
+        input[type="date"] {
+            background-image: none; /* 日期選單不需要自訂箭頭 */
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #e76f51;
+        }
+
+        #result {
+            margin-top: 25px;
+            text-align: left;
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+
+        .weather-card {
+            background-color: #fff8f0;
+            border: 2px solid #ffe8cc;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .temp-display {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin: 10px 0;
+            text-align: center;
+        }
+
+        .temp-range {
+            text-align: center;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .advice-card {
+            background-color: white;
+            border-radius: 15px;
+            padding: 10px 0;
+        }
+
+        .advice-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .advice-icon {
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .loading {
+            color: #888;
+            margin-top: 20px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>穿搭小幫手 🌤️</h1>
+    <p class="subtitle">選擇城市與日期，自動推薦穿搭</p>
+
+    <div class="form-group">
+        <label for="city">選擇城市</label>
+        <select id="city">
+            <option value="Seoul">🇰🇷 首爾 (Seoul)</option>
+            <option value="Busan">🇰🇷 釜山 (Busan)</option>
+            <option value="Jeju City">🇰🇷 濟州島 (Jeju)</option>
+            <option value="Gangwon-do">🇰🇷 江原道 (Gangwon-do)</option>
+            <hr>
+            <option value="Tokyo">🇯🇵 東京 (Tokyo)</option>
+            <option value="Osaka">🇯🇵 大阪 (Osaka)</option>
+            <option value="Fukuoka">🇯🇵 福岡 (Fukuoka)</option>
+            <hr>
+            <option value="Da Nang">🇻🇳 峴港 (Da Nang)</option>
+            <option value="Ho Chi Minh City">🇻🇳 胡志明市 (Ho Chi Minh)</option>
+            <option value="Hanoi">🇻🇳 河內 (Hanoi)</option>
+            <hr>
+            <option value="Bangkok">🇹🇭 曼谷 (Bangkok)</option>
+            <option value="Chiang Mai">🇹🇭 清邁 (Chiang Mai)</option>
+            <option value="Hua Hin">🇹🇭 華欣 (Hua Hin)</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="date">日期</label>
+        <input type="date" id="date">
+    </div>
+
+    <button onclick="getWeather()">查詢天氣與穿搭</button>
+    <div id="loading" class="loading">正在連線氣象衛星...🛰️</div>
+
+    <div id="result">
+        <div class="weather-card">
+            <div style="text-align: center; font-weight: bold; color: #555;">預測氣溫</div>
+            <div class="temp-display" id="avg-temp">--°C</div>
+            <div class="temp-range">最低 <span id="min-temp">--</span>° / 最高 <span id="max-temp">--</span>°</div>
+        </div>
+
+        <div class="advice-card">
+            <h3 style="font-size: 1.1rem; margin-bottom: 15px;">👕 建議穿搭：</h3>
+            <div id="advice-list">
+                </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 設定預設日期為今天
+    document.getElementById('date').valueAsDate = new Date();
+
+    async function getWeather() {
+        const cityValue = document.getElementById('city').value; // 這裡會抓到 value 裡的英文
+        const dateInput = document.getElementById('date').value;
+        const resultDiv = document.getElementById('result');
+        const loadingDiv = document.getElementById('loading');
+        
+        // 顯示載入中
+        resultDiv.style.display = 'none';
+        loadingDiv.style.display = 'block';
+
+        try {
+            // 1. 搜尋城市經緯度 (因為使用選單的精準英文，所以幾乎不會失敗)
+            const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${cityValue}&count=1&language=en&format=json`);
+            const geoData = await geoRes.json();
+
+            if (!geoData.results) {
+                alert("找不到這個城市的資料，請稍後再試。");
+                loadingDiv.style.display = 'none';
+                return;
+            }
+
+            const { latitude, longitude } = geoData.results[0];
+
+            // 2. 查詢天氣
+            const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=temperature_2m_max,temperature_2m_min&timezone=auto&start_date=${dateInput}&end_date=${dateInput}`);
+            const weatherData = await weatherRes.json();
+
+            if (!weatherData.daily) {
+                alert("無法取得該日期的天氣資訊，請查詢未來 7 天內的日期。");
+                loadingDiv.style.display = 'none';
+                return;
+            }
+
+            const minTemp = weatherData.daily.temperature_2m_min[0];
+            const maxTemp = weatherData.daily.temperature_2m_max[0];
+            const avgTemp = (minTemp + maxTemp) / 2;
+
+            // 3. 顯示數據
+            document.getElementById('min-temp').innerText = minTemp;
+            document.getElementById('max-temp').innerText = maxTemp;
+            document.getElementById('avg-temp').innerText = avgTemp.toFixed(1) + "°C";
+
+            // 4. 產生穿搭建議
+            generateOutfitAdvice(avgTemp, minTemp);
+
+            loadingDiv.style.display = 'none';
+            resultDiv.style.display = 'block';
+
+        } catch (error) {
+            console.error(error);
+            alert("發生錯誤，請稍後再試。");
+            loadingDiv.style.display = 'none';
+        }
+    }
+
+    function generateOutfitAdvice(avgTemp, minTemp) {
+        let advices = [];
+
+        if (avgTemp >= 30) {
+            advices = ["🥵 天氣超級熱！透氣最重要", "推薦：短袖、短褲、背心、涼鞋", "必備：防曬乳、墨鏡、小風扇"];
+        } else if (avgTemp >= 25) {
+            advices = ["😎 溫暖舒適，適合輕便穿搭", "推薦：短袖、薄襯衫、棉麻長褲", "提醒：室內冷氣強，可帶薄外套"];
+        } else if (avgTemp >= 20) {
+            advices = ["🍂 微涼舒服，最適合旅遊的溫度", "推薦：薄長袖、針織衫、牛仔褲", "提醒：建議帶件風衣或牛仔外套"];
+        } else if (avgTemp >= 15) {
+            advices = ["🧥 有點冷囉，要注意保暖", "推薦：大學 T、帽 T、厚夾克", "提醒：怕冷的可以在裡面加發熱衣"];
+        } else if (avgTemp >= 10) {
+            advices = ["🧣 蠻冷的！厚外套要出動了", "推薦：毛衣、毛呢大衣、厚長褲", "必備：圍巾是最好的時尚保暖單品"];
+        } else if (avgTemp >= 5) {
+            advices = ["🧤 寒流等級！全身都要包起來", "推薦：羽絨外套、羊毛衣、發熱褲", "必備：手套、毛帽、暖暖包"];
+        } else {
+            advices = ["🥶 凍僵了！生存保暖第一", "推薦：長版羽絨衣、防風褲、刷毛內搭", "提醒：沒事別讓皮膚露在外面！"];
+        }
+
+        if (minTemp < 10 && avgTemp > 18) {
+            advices.push("⚠️ 日夜溫差非常大，一定要洋蔥式穿搭！");
+        }
+
+        const list = document.getElementById('advice-list');
+        list.innerHTML = advices.map(item => `<div class="advice-item"><span class="advice-icon">👉</span>${item}</div>`).join('');
+    }
+</script>
+
+</body>
+</html>
